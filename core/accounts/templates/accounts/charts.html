@@ -1,0 +1,88 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+
+
+{% block content %}
+<canvas id="myChart" style="width: 10px;"></canvas>
+
+<script>
+
+	// Dados aleatórios para o gráfico
+	var labels = ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4', 'Categoria 5', 'Categoria 6'];
+	var data = [12, 19, 3, 5, 2, 3];
+	var total = data.reduce((acc, val) => acc + val, 0); // Calcula o total
+
+	// Configuração do gráfico
+	var ctx = document.getElementById('myChart').getContext('2d');
+	var myChart = new Chart(ctx, {
+		type: 'doughnut',
+		data: {
+			labels: labels,
+			datasets: [{
+				data: data,
+				backgroundColor: [
+					'rgba(70,130,180)',
+					'rgba(173,216,230)',
+					'rgba(135,206,235)',
+					'rgba(135,206,250)',
+					'rgba(0,191,255)',
+					'rgba(30,144,255)',
+				],
+				borderColor: 'rgba(255,255,255,1)', // Cor branca
+				borderWidth: 2
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					display: true,
+					position: 'right'
+				},
+				datalabels: {
+					display: true,
+					color: '#000',
+					textAlign: 'center',
+					font: {
+						weight: 'bold',
+						size: 16
+					},
+					formatter: function (value, context) {
+						return ((value / total) * 100).toFixed(2) + '%';
+					},
+					anchor: 'center'
+				}
+			}
+		}
+	});
+
+	// Plugin para adicionar o valor total no centro do gráfico
+	Chart.pluginService.register({
+		beforeDraw: function (chart) {
+			if (chart.config.type === 'doughnut') {
+				var width = chart.chart.width,
+					height = chart.chart.height,
+					ctx = chart.chart.ctx;
+
+				ctx.restore();
+				var fontSize = (height / 160).toFixed(2);
+				ctx.font = fontSize + "em sans-serif";
+				ctx.textBaseline = "middle";
+
+				var text = total.toFixed(2),
+					textX = Math.round((width - ctx.measureText(text).width) / 2),
+					textY = height / 2;
+
+				ctx.fillText(text, textX, textY);
+				ctx.save();
+			}
+		}
+	});
+</script>
+</body>
+
+</html>
+
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+pireps_flights = PirepsFlight.objects.filter(pilot=user, status='approved')  # Mantém o filtro para o objeto user
+    print(pireps_flights)
+    total_hours = pireps_flights.aggregate(total_hours=Sum('flight_duration'))['total_hours']
+    
+    total_flights = pireps_flights.count()
+    
+    now = timezone.now()
+    thirty_days_ago = now - timedelta(days=30)
+    last_30_days_flights = pireps_flights.filter(registration_date__gte=thirty_days_ago).count()
+    last_30_days_hours = pireps_flights.filter(registration_date__gte=thirty_days_ago).aggregate(total_hours=Sum('flight_duration'))['total_hours']

@@ -1,0 +1,274 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .background {
+        background-size: cover;
+        background-position: center;
+        filter: blur(5px);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        z-index: -1;
+        opacity: 0.5;
+    }
+
+    .content {
+        position: relative;
+        z-index: 1;
+        padding: 30px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.8);
+        border: none;
+    }
+
+    .background-image {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .input-group-sm .form-control {
+        max-width: 190px;
+    }
+
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .distance {
+        display: block;
+        margin-top: 2px;
+    }
+
+    .flight-info {
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 767px) {
+        .table-container {
+            max-height: none;
+            overflow-y: visible;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+    }
+</style>
+
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="background" style="background-image: url('{{ user_award.award.link_image }}');"></div>
+        <div class="content row">
+            <div class="col-md-3 col-12">
+                <img class="background-image" src="{{ user_award.award.link_image }}" alt="Award Image">
+                <br><br>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text text-white" style="background-color: #0d6efd;">Start</span>
+                    <input type="text" class="form-control text-center" value="{{ user_award.start_date|date:'d/m/y' }}" aria-label="Start">
+                </div>
+                {% if user_award.progress == 100 %}
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text text-white" style="background-color: #0d6efd;">End</span>
+                    <input type="text" class="form-control text-center" value="{{ user_award.end_date|date:'d/m/y' }}" aria-label="End">
+                </div>
+                {% else %}
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text text-white" style="background-color: #0d6efd;">End</span>
+                    <input type="text" id="end-input" class="form-control" aria-label="End">
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-9 col-12">
+                <h3 class="text-left">{{ user_award.award.name }}</h3>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        {{ user_award.award.description }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 col-12">
+                <div class="card card-map mb-3">
+                    <div id="map" class="map" style="width: 100%; height: 600px;"></div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-12">
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table text-center table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">SEQUÊNCIA DESDE O INÍCIO</th>
+                                    <th scope="col">SEQUÊNCIA</th>
+                                    <th scope="col">QUALQUER ORDEM</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="flightTableBody">
+                                {% for flight_leg in required_flights %}
+                                <tr data-completed="{{ flight_leg.is_completed|yesno:'true,false' }}">
+                                    <td class="{% if flight_leg.is_completed %}bg-success text-white{% endif %}">
+                                        {{ flight_leg.from_airport }} <br><span class="namefrom" data-code="{{ flight_leg.from_airport }}"></span>
+                                    </td>
+                                    <td class="{% if flight_leg.is_completed %}bg-success text-white{% endif %}">
+                                        <span>Perna - {{ forloop.counter }}</span>
+                                        <p class="flight-info">➔</p>
+                                        <span class="distance" data-from="{{ flight_leg.from_airport }}" data-to="{{ flight_leg.to_airport }}"></span>
+                                    </td>
+                                    <td class="{% if flight_leg.is_completed %}bg-success text-white{% endif %}">
+                                        {{ flight_leg.to_airport }} <br><span class="nameto" data-code="{{ flight_leg.to_airport }}"></span>
+                                    </td>
+                                    <td class="{% if flight_leg.is_completed %}bg-success text-white{% endif %}">
+                                        <span class="status">
+                                            {% if flight_leg.is_completed %}
+                                            <i class="fa-solid fa-check"></i>
+                                            {% else %}
+                                            <i class="fa-regular fa-square"></i>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Lógica JavaScript para atualizar dinamicamente
+    });
+
+    // Inicializa o mapa
+    var map = L.map('map').setView([-23.55052, -46.633308], 10);
+
+    // Adiciona uma camada de mapa
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+    }).addTo(map);
+
+    // Função para calcular a distância entre duas coordenadas
+    function haversineDistance(coords1, coords2) {
+        function toRad(x) {
+            return x * Math.PI / 180;
+        }
+
+        var lat1 = coords1[0];
+        var lon1 = coords1[1];
+        var lat2 = coords2[0];
+        var lon2 = coords2[1];
+
+        var R = 3440.065; // Raio da Terra em milhas náuticas
+        var dLat = toRad(lat2 - lat1);
+        var dLon = toRad(lon2 - lon1);
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c;
+
+        return d;
+    }
+
+    // Função para buscar os dados da API e plotar as linhas e marcadores no mapa
+    function plotFlightPath(flightPairs) {
+        const url = 'https://raw.githubusercontent.com/mwgg/Airports/master/airports.json';
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                flightPairs.forEach(pair => {
+                    const fromAirport = data[pair.from];
+                    const toAirport = data[pair.to];
+
+                    
+                    // Atualiza os elementos da tabela com os nomes dos aeroportos
+                    document.querySelectorAll(`.namefrom[data-code="${pair.from}"]`).forEach(element => {
+                        element.innerHTML = fromAirport ? fromAirport.name : 'Unknown';
+                    });
+                    document.querySelectorAll(`.nameto[data-code="${pair.to}"]`).forEach(element => {
+                        element.innerHTML = toAirport ? toAirport.name : 'Unknown';
+                    });
+
+                    if (fromAirport && toAirport) {
+                        const fromLatLon = [fromAirport.lat, fromAirport.lon];
+                        const toLatLon = [toAirport.lat, toAirport.lon];
+
+                        // Calcula a distância em milhas náuticas e arredonda
+                        const distance = Math.round(haversineDistance(fromLatLon, toLatLon));
+
+                        // Atualiza o elemento da tabela com a distância calculada
+                        document.querySelectorAll(`.distance[data-from="${pair.from}"][data-to="${pair.to}"]`).forEach(element => {
+                            element.innerHTML = `${distance} NM`;
+                        });
+
+                        // Define a cor da linha com base no status de conclusão
+                        const lineColor = pair.completed ? 'green' : 'black';
+
+                        // Adiciona a linha no mapa
+                        L.polyline([fromLatLon, toLatLon], { color: lineColor }).addTo(map);
+
+                        // Adiciona os marcadores no mapa com círculo preenchido
+                        L.circleMarker(fromLatLon, { radius: 5, color: '#5c5b5a', fillColor: '#5c5b5a', fillOpacity: 1 }).addTo(map).bindPopup(`<b>${pair.from}</b><br>${fromAirport.name}`);
+                        L.circleMarker(toLatLon, { radius: 5, color: '#5c5b5a', fillColor: '#5c5b5a', fillOpacity: 1 }).addTo(map).bindPopup(`<b>${pair.to}</b><br>${toAirport.name}`);
+                    } else {
+                        console.error(`Airport data not found for codes: ${pair.from}, ${pair.to}`);
+                    }
+                });
+
+                // Ajusta a visualização do mapa para mostrar todas as linhas
+                const allLatLngs = flightPairs.flatMap(pair => {
+                    const from = data[pair.from];
+                    const to = data[pair.to];
+                    return from && to ? [[from.lat, from.lon], [to.lat, to.lon]] : [];
+                });
+                if (allLatLngs.length > 0) {
+                    map.fitBounds(allLatLngs);
+                }
+            })
+            .catch(error => console.error('Error fetching airport data:', error));
+    }
+
+    // Obtém os pares de voos da tabela
+    function getFlightPairs() {
+        const flightRows = document.querySelectorAll('#flightTableBody tr');
+        const flightPairs = [];
+
+        flightRows.forEach(row => {
+            const fromCell = row.children[0];
+            const toCell = row.children[2];
+
+            const fromValue = fromCell ? fromCell.textContent.trim() : '';
+            const toValue = toCell ? toCell.textContent.trim() : '';
+            const isCompleted = row.getAttribute('data-completed') === 'true';
+
+            if (fromValue && toValue) {
+                flightPairs.push({ from: fromValue, to: toValue, completed: isCompleted });
+            }
+        });
+
+        return flightPairs;
+    }
+
+    const flightPairs = getFlightPairs();
+    if (flightPairs.length > 0) {
+        plotFlightPath(flightPairs);
+    }
+</script>
+
+{% endblock %}

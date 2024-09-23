@@ -1,0 +1,83 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+
+
+{% block content %}
+<style>
+    .card {
+        border: 1px solid #d4d4d4;
+        /* Borda cinza para o card */
+        margin: 10px 0;
+        /* Margem acima e abaixo do card */
+        padding: 20px;
+        /* Preenchimento interno do card */
+        background-color: #ffffff;
+        /* Fundo branco para o card */
+        border-radius: 5px;
+        /* Bordas arredondadas */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Sombra leve para o card */
+    }
+
+    .centered {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-corpo">
+            <div class="titulo"><strong>Minhas Wolrd Tour</strong></div>
+            <hr> <!-- Linha divisória -->
+            <div class="caixa-conteudo">
+                <!-- Conteúdo da caixa aqui -->
+                <table id="example" class="table display table-hover table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Titulo</th>
+                            <th class="text-center">Inicio</th>
+                            <th class="text-center">Fim</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for listAwards in user_awards %}
+                        <tr onclick="window.location.href='/app/awards/{{ listAwards.id }}/'">
+                            <td><img src="{{ listAwards.award.link_image }}" alt="" style="width: 100px;"> {{ listAwards.award.name }}</td>
+                            <td class="text-center">{{ listAwards.start_date|date:'d/m/y' }}</td>
+                            <td class="text-center">{{ listAwards.end_date|date:'d/m/y' }}</td>
+                            <td>
+                                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="{{ listAwards.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="width: {{ listAwards.progress }}%">{{ listAwards.progress }} %</div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <!-- Controles de paginação -->
+                <ul class="pagination justify-content-center">
+                    {% if pireps_flights.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ pireps_flights.previous_page_number }}">Anterior</a></li>
+                    {% endif %}
+                    {% for i in pireps_flights.paginator.page_range %}
+                    <li class="page-item {% if pireps_flights.number == i %}active{% endif %}"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endfor %}
+                    {% if pireps_flights.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ pireps_flights.next_page_number }}">Próximo</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable();
+    });
+
+</script>
+
+{% endblock %}

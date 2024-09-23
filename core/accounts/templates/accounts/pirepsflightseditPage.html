@@ -1,0 +1,34 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+{% load bootstrap %}
+
+
+{% block content %}
+<style>
+    form {
+        margin: 40px auto;
+    }
+
+    form input {
+        margin: 0 0 30px;
+    }
+</style>
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %} text-center" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+<div class="row justify-content-center" style="padding: 10px;">
+    <div class="col-md-7">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form|bootstrap_horizontal:'col-sm-4' }}
+            <div> <!-- Adicione a classe text-center para centralizar horizontalmente -->
+                <input type="submit" class="btn btn-primary" value="Registrar">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

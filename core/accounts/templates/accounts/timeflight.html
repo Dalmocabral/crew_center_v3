@@ -1,0 +1,87 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+{% load gravatar_tags %}
+
+{% block content %}
+<style>
+    .card {
+        border: 1px solid #d4d4d4;
+        margin: 20px 0;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .centered {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table th, .table td {
+        vertical-align: middle !important;
+        text-align: center;
+    }
+</style>
+<div class="container-fluid ">
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped" id="myTable">
+                <thead>
+                    <tr>
+                        <th class="text-center">Avatar</th>
+                        <th class="text-center">Piloto</th>
+                        <th class="text-center">Hub</th>
+                        <th class="text-center">País</th>
+                        <th class="text-center">Rank</th>
+                        <th class="text-center">Voo</th>
+                        <th class="text-center">Pontos</th>
+                        <th class="text-center">Hora de Voos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in users_data %}
+                    <tr>
+                        <td class="text-center"><img src="{{ data.user.email|gravatar_url:80 }}" alt="User Gravatar" class="rounded-image"></td>
+                        <td><a href="{% url 'user_details' data.user.id %}"> {{ data.user.first_name|capfirst }} {{ data.user.last_name|capfirst }}</a></td>
+                        <td class="text-center">{{ data.user.base|upper }}</td>
+                        <td>
+                            {% if data.flag_url %}
+                            <img src="{{ data.flag_url }}" alt="{{ data.user.country }}" style="width: 22px;">
+                            {% else %}
+                            {{ data.user.country }}
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if data.total_approved_hours|floatformat:2 > 500 %}
+                            <img src="{% static 'image/patente/CMD.png' %}" alt="" style="width: 50px;">
+                            {% elif data.total_approved_hours|floatformat:2 > 250 %}
+                            <img src="{% static 'image/patente/POF.png' %}" alt="" style="width: 50px;">
+                            {% elif data.total_approved_hours|floatformat:2 > 200 %}
+                            <img src="{% static 'image/patente/COP2.png' %}" alt="" style="width: 50px;">
+                            {% else %}
+                            <img src="{% static 'image/patente/COP.png' %}" alt="" style="width: 50px;">
+                            {% endif %}
+                        </td>
+                        <td class="text-center">{{ data.total_approved_flights }}</td>
+                        <td class="text-center">{{ data.total_score }}</td>
+                        <td class="text-center">
+                            {% if data.total_approved_hours %}
+                            {{ data.total_approved_hours }}
+                            {% else %}
+                            00:00:00
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#myTable').DataTable();
+    });
+</script>
+{% endblock %}
