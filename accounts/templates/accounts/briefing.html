@@ -1,0 +1,441 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+
+
+{% block content %}
+<style>
+    /* Estilo adicional para fixar o mapa */
+    .mapa-fixado {
+        position: sticky;
+        top: 0;
+        /* Ajuste este valor conforme necessário */
+        height: 100vh;
+        /* Altura do viewport */
+    }
+
+    /* Estilo para a barra de rolagem na primeira coluna */
+    .coluna-com-rolagem {
+        max-height: 100vh;
+        overflow: auto;
+    }
+
+    .card-alerta {
+        position: relative;
+        padding: 15px;
+        margin: 10px 0;
+
+        /* Ajuste este valor conforme necessário */
+        background-color: #292b30;
+        border-radius: 5px;
+        color: #fff;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .fechar {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    .card {
+        border: 1px solid #d4d4d4;
+        /* Borda cinza para o card */
+        margin: 10px 0;
+        /* Margem acima e abaixo do card */
+        padding: 20px;
+        /* Preenchimento interno do card */
+        background-color: #ffffff;
+        /* Fundo branco para o card */
+        border-radius: 5px;
+        /* Bordas arredondadas */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Sombra leve para o card */
+    }
+
+    .card-corpo header,
+    .card header {
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-corpo hr,
+    .card hr {
+        border: 0;
+        height: 1px;
+        background-color: #d4d4d4;
+        /* Cor da linha divisória */
+        margin: 10px 0;
+    }
+
+    .titulo {
+
+
+        color: var(--main-text-color);
+        font-weight: 600;
+    }
+
+    figure {
+        margin: 0;
+        /* Remove margens padrão */
+        padding: 0;
+        /* Remove preenchimento padrão */
+    }
+
+    figcaption,
+    p {
+        margin: 0;
+        /* Remove margens padrão */
+        text-align: center;
+        /* Centraliza o texto */
+    }
+
+    hr {
+        margin: 0;
+        /* Remove margens padrão do <hr> */
+        border: none;
+        /* Remove a borda padrão */
+        height: 1px;
+        /* Define a altura da linha */
+        background-color: #d4d4d4;
+        /* Define a cor da linha */
+        width: 100%;
+        /* Garante que a linha vá até as bordas */
+    }
+
+    .caixa-conteudo {
+        border: 1px solid #d4d4d4;
+        /* Borda da caixa */
+        padding: 10px;
+        /* Preenchimento interno da caixa */
+        margin-bottom: 10px;
+        /* Espaço abaixo da caixa */
+        /* Outros estilos que desejar */
+        background-color: #ccc;
+        height: 50px;
+        /* Altura da caixa */
+    }
+
+    #map {
+        width: 100%;
+        height: 600px;
+        margin-top: 50px;
+        /* Ajuste este valor conforme necessário */
+    }
+
+    .card-map {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+
+    }
+
+    .sua-classe-css-aqui .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+
+        background-color: #acdef2;
+        border-radius: 5px;
+
+        /* Adicione outros estilos conforme necessário */
+    }
+</style>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Coluna de Informações com Barra de Rolagem -->
+        <div class="col-12 col-lg-6 coluna-com-rolagem">
+            <!-- Conteúdo da Coluna 1 -->
+
+            <div class=" card-alerta">
+                <span class="fechar" onclick="this.parentElement.style.display='none';">&times;</span>
+                <i class="fa-solid fa-circle-info"></i> Este briefing foi gerado em:
+                {{ pireps_flight.registration_date|date:"d \d\e F \d\e Y" }}
+            </div>
+
+            <div class="card">
+                <div class="card-corpo">
+                    <font class=" titulo" style="vertical-align: inherit;">
+                        <font style="vertical-align: inherit;">Informações de voo</font>
+                    </font>
+                    <hr> <!-- Linha divisória -->
+                    <div style="display: flex; justify-content: space-between;">
+                        <figure>
+                            <figcaption>Número de voo</figcaption>
+                            {% if pireps_flight.flight_number is not None %}
+                            <p>{{pireps_flight.flight_number}}</p>
+                            {% else %}
+                            <p>--- / ---</p>
+                            {% endif %}
+                            <hr>
+                        </figure>
+                        <figure>
+                            <figcaption>Indicativo</figcaption>
+                            {% if pireps_flight.flight_icao is not None %}
+                            <p>{{pireps_flight.flight_icao}}</p>
+                            {% else %}
+                            <p> --- / --- </p>
+                            {% endif %}
+                            <hr>
+                        </figure>
+                        <figure>
+                            <figcaption>Partida</figcaption>
+                            {% if pireps_flight.departure_airport is not None %}
+                            <p>{{pireps_flight.departure_airport}}</p>
+                            {% else %}
+                            <p>--- / ---</p>
+                            {% endif %}
+                            <hr>
+                        </figure>
+                        <figure>
+                            <figcaption>Chegada</figcaption>
+                            {% if pireps_flight.arrival_airport is not None %}
+                            <p>{{pireps_flight.arrival_airport}}</p>
+                            {% else %}
+                            <p>--- / ---</p>
+                            {% endif %}
+                            <hr>
+                        </figure>
+                        <figure>
+                            <figcaption>Alternar</figcaption>
+                            {% if pireps_flight.alternate_airport is not none %}
+                            <p>{{pireps_flight.alternate_airport}}</p>
+                            {% else %}
+                            <p>--- / ---</p>
+                            {% endif %}
+                            <hr>
+                        </figure>
+                        <figure>
+                            <figcaption>Aeronave</figcaption>
+                            {% if pireps_flight.aircraft is not None %}
+                            <p>{{pireps_flight.aircraft}}</p>
+                            {% else %}
+                            <p>--- / ---</p>
+                            {% endif %}
+                            <hr>
+                        </figure>
+                        <!-- Repita a estrutura para os demais elementos -->
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <figure>
+                            <figcaption>Data de partida</figcaption>
+                            <p>{{pireps_flight.registration_date|date:"d/y"}}</p>
+
+                        </figure>
+                        <figure>
+                            <figcaption>Horário Dep</figcaption>
+                            <p>--- / ---</p>
+
+                        </figure>
+                        <figure>
+                            <figcaption>Tempo Arr</figcaption>
+                            <p>---/---</p>
+
+                        </figure>
+                        <figure>
+                            <figcaption>Distância da rota</figcaption>
+                            <p id="distance"></p>
+
+                        </figure>
+                        <figure>
+                            <figcaption>Cruzeiro</figcaption>
+                            <p>---/---</p>
+
+                        </figure>
+                        <figure>
+                            <figcaption>Status</figcaption>
+                            <p>{{pireps_flight.status}}</p>
+
+                        </figure>
+                        <!-- Repita a estrutura para os demais elementos -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-corpo">
+                    <div class="titulo">Rota</div>
+                    <hr> <!-- Linha divisória -->
+                    <div class="caixa-conteudo">
+                        <!-- Conteúdo da caixa aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-corpo">
+                    <div class="titulo">Observações de Despacho</div>
+                    <hr> <!-- Linha divisória -->
+                    <div class="caixa-conteudo">
+                        <!-- Conteúdo da caixa aqui -->
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <!-- Coluna do Mapa Fixo -->
+        <div class="col-12 col-lg-6 mapa-fixado">
+            <!-- Conteúdo da Coluna 2 (Mapa) -->
+            <div class="card card-map">
+                <div id="map" style="width: 100%; height: 600px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Inicializa o mapa
+    var map = L.map('map').setView([-12.163200486951586, -53.51511964322111], 8);
+
+    // Adiciona camada de azulejo ao mapa
+    L.tileLayer('https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=4wF6jQHaoE1IdtQRtvlG', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    }).addTo(map);
+
+    // URL do arquivo JSON de aeroportos
+    const url = 'https://raw.githubusercontent.com/mwgg/Airports/master/airports.json';
+
+    // Função assíncrona para obter dados do JSON de aeroportos
+    async function fetchAirports() {
+        const response = await fetch(url);
+        return await response.json();
+    }
+
+    // Função para adicionar marcador ao mapa
+    function addMarker(lat, lon) {
+        return L.marker([lat, lon]).addTo(map);
+    }
+
+
+
+    // Função principal para exibir aeroportos no mapa
+    async function displayAirports() {
+        // Obtém dados do JSON de aeroportos
+        const airportsData = await fetchAirports();
+
+        // Obtém códigos de aeroportos de partida, chegada e alternativo
+        const depCode = '{{ pireps_flight.departure_airport }}';
+        const arrCode = '{{ pireps_flight.arrival_airport }}';
+        const altCode = '{{ pireps_flight.alternate_airport }}';
+
+        // Obtém dados dos aeroportos de partida, chegada e alternativo
+        const depAirport = airportsData[depCode];
+        const arrAirport = airportsData[arrCode];
+        const altAirport = airportsData[altCode]
+
+        //console.log(altAirport)
+
+        // Adiciona popups ao mapa para depAirport e arrAirport
+        var depPopup = L.popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: 'sua-classe-css-aqui', // Substitua 'sua-classe-css-aqui' pelo nome da sua classe CSS
+        })
+            .setLatLng([depAirport.lat, depAirport.lon])
+            .setContent(getPopupContent(depAirport))
+            .addTo(map);
+
+        var arrPopup = L.popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: 'sua-classe-css-aqui', // Substitua 'sua-classe-css-aqui' pelo nome da sua classe CSS
+        })
+            .setLatLng([arrAirport.lat, arrAirport.lon])
+            .setContent(getPopupContent(arrAirport))
+            .addTo(map);
+
+        // Adiciona popup para altAirport apenas se estiver definido
+        if (altAirport !== null && altAirport !== undefined) {
+            var altPopup = L.popup({
+                closeButton: false,
+                closeOnClick: false,
+                className: 'sua-classe-css-aqui-alt', // Substitua 'sua-classe-css-aqui' pelo nome da sua classe CSS
+            })
+                .setLatLng([altAirport.lat, altAirport.lon])
+                .setContent(getPopupContent(altAirport))
+                .addTo(map);
+        }
+
+        // Cria um polígono entre os aeroportos de partida e chegada
+        const latLngs1 = [[depAirport.lat, depAirport.lon], [arrAirport.lat, arrAirport.lon]];
+        const polygon1 = L.polyline(latLngs1, { color: 'black' }).addTo(map);
+
+        // Verifica se altAirport não é None antes de criar o segundo polígono
+        if (altAirport !== undefined) {
+            // Cria um segundo polígono entre os aeroportos de chegada e alternativo
+            const latLngs2 = [[arrAirport.lat, arrAirport.lon], [altAirport.lat, altAirport.lon]];
+            const polygon2 = L.polyline(latLngs2, { color: 'gray', dashArray: '5, 5' }).addTo(map);
+        }
+
+
+
+
+       // Verifica se altAirport é null
+if (altAirport === undefined) {
+    // Se altAirport for null, ajusta o mapa para exibir apenas os aeroportos de partida e chegada
+    const latLngs = [
+        [depAirport.lat, depAirport.lon],
+        [arrAirport.lat, arrAirport.lon]
+    ];
+    const zoomLevel = map.getBoundsZoom(latLngs, false, new L.Point(300, 300));
+    map.setView([(depAirport.lat + arrAirport.lat) / 2, (depAirport.lon + arrAirport.lon) / 2], zoomLevel);
+} else {
+    // Se altAirport não for null, ajusta o mapa para exibir os aeroportos de partida, chegada e alternativo
+    const latLngs = [
+        [depAirport.lat, depAirport.lon],
+        [arrAirport.lat, arrAirport.lon],
+        [altAirport.lat, altAirport.lon]
+    ];
+    const zoomLevel = map.getBoundsZoom(latLngs, false, new L.Point(300, 300));
+    map.setView([(depAirport.lat + arrAirport.lat + altAirport.lat) / 3, (depAirport.lon + arrAirport.lon + altAirport.lon) / 3], zoomLevel);
+}
+
+        // Coordenadas dos aeroportos de partida e chegada
+        const depLat = depAirport.lat;
+        const depLon = depAirport.lon;
+        const arrLat = arrAirport.lat;
+        const arrLon = arrAirport.lon;
+
+        // Função para converter graus para radianos
+        function toRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        // Raio da Terra em quilômetros
+        const R = 6371;
+
+        // Diferença de latitude e longitude entre os pontos
+        const deltaLat = toRadians(arrLat - depLat);
+        const deltaLon = toRadians(arrLon - depLon);
+
+        // Aplicando a fórmula do haversine
+        const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+            Math.cos(toRadians(depLat)) * Math.cos(toRadians(arrLat)) *
+            Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        // Calculando a distância em quilômetros
+        const distance = (R * c).toFixed(0);
+
+        // Atualiza o conteúdo do elemento HTML com a distância calculada
+        document.getElementById("distance").innerText = distance + " mn";
+
+
+        // Atualiza os elementos HTML com informações dos aeroportos
+        document.getElementById("depcity").innerHTML = `${depAirport.city}, ${depAirport.state}-${depAirport.country}`;
+        document.getElementById("depname").innerHTML = depAirport.name;
+
+        document.getElementById("arrcity").innerHTML = `${arrAirport.city}, ${arrAirport.state}-${arrAirport.country}`;
+        document.getElementById("arrname").innerHTML = arrAirport.name;
+    }
+    // Função auxiliar para obter conteúdo do popup
+    function getPopupContent(airport) {
+        return `<strong>${airport.icao}</strong>               
+            `;
+    }
+    // Chama a função para exibir os aeroportos no mapa
+    displayAirports();
+
+
+</script>
+
+{% endblock %}

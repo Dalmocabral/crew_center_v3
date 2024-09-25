@@ -1,0 +1,86 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+{% load bootstrap %}
+
+
+{% block content %}
+<style>
+    .card {
+        border: 1px solid #d4d4d4;
+        margin: 10px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+    }
+
+    .card-title {
+        font-weight: bold;
+        font-size: 1.25rem;
+        text-align: center;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    form {
+        margin: 0 auto;
+        max-width: 400px;
+    }
+
+    .form-group {
+        margin-bottom: 20px; /* Adiciona espaço entre os campos do formulário */
+    }
+
+    form input[type="submit"] {
+        margin-top: 20px;
+    }
+
+    /* Adiciona cor de fundo aos campos de entrada */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    input[type="time"] {
+        background-color: #bdc2c7; /* Cor de fundo desejada */
+    }
+</style>
+
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-title">REGISTRO DE VOOS</div>
+            <hr>
+            <div class="messages-container">
+
+            </div>
+            <div class="content">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form|bootstrap_horizontal:'col-sm-4' }}
+                    <div class="text-center">
+                        <input type="submit" class="btn btn-primary" value="Registrar">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    {% for message in messages %}
+    Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "{{ message }}",
+        showConfirmButton: false,
+        timer: 2000 
+        
+        
+    });
+    {% endfor %}
+</script>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<div id="map-controls">
+    <select id="map-mode" class="form-select form-select-lg mb-3">
+        <option value="trainner">Trainner</option>
+        <option value="casual">Casual</option>
+        <option value="expert">Expert</option>
+    </select>
+    <button id="dark-mode-toggle" class="btn btn-secondary">
+        <svg id="dark-mode-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-moon" viewBox="0 0 16 16">
+            <path
+                d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286" />
+        </svg>
+    </button>
+    <button class="btn btn-info" id="map-control-ifab">All
+
+    </button>
+</div>
+<div id="map-container">
+    <div id="map"></div>
+    <div class="sidebar" id="sidebar">
+        <div id="flight-info-column" class="flightinfo-callsign">
+            <div class="flightinfo-callsign">
+                <div class="row">
+                    <div class="col-md-2">
+                        <img alt="Plane tail" src="{% static 'assets/images/asa.svg' %}">
+                    </div>
+                    <div class="col-md-7 align-items-center" style="cursor: pointer;">
+                        <h4 id="flightNumber">${flightNumber}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="flightinfo-route">
+                <div class="row text-center">
+                    <div class="col">
+                        <div>
+                            <span id="infoDep"><strong></strong></span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <span id="infoArr"><strong></strong></span>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col">
+                        <div class="flex-grow-1">
+                            <div class="progress w-100 progress-sm" style="margin-top: -10px;">
+                                <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0"
+                                    aria-valuemax="100"></div>
+                            </div>
+                            <svg class="MuiSvgIcon-root" focusable="false" viewBox="0 0 24 24" aria-hidden="true"
+                                style="font-size: 14pt; font-weight: bold; margin-left: ; position: relative; transform: rotate(90deg); top: -21px; color:#000000">
+                                <path
+                                    d="M22 16v-2l-8.5-5V3.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V9L2 14v2l8.5-2.5V19L8 20.5V22l4-1 4 1v-1.5L13.5 19v-5.5L22 16z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <!-- Adicione mais informações aqui conforme necessário -->
+            </div>
+        </div>
+        <br>
+        <div class="d-flex justify-content-center">
+            <div class="col m-2 infolightbox" id="airplaneInfo" style="padding: 10px; text-align: center;">
+                <h6 class="MuiTypography-root MuiTypography-h6 MuiTypography-alignCenter" style="padding: 0px; margin-bottom: 2px; margin-top: 2px;">N0461</h6>
+                <p class="lead-wgt">SPEED</p>
+            </div>
+            <div class="col m-2 infolightbox"  style="padding: 10px; text-align: center;">                
+                <h6 class="MuiTypography-root MuiTypography-h6 MuiTypography-alignCenter"  id="AltitudeInfo" style="padding: 0px; margin-bottom: 2px; margin-top: 2px;">N0461</h6>
+                <p class="lead-wgt">ALTITUDE</p>
+            </div>
+            <div class="col m-2 infolightbox"  style="padding: 10px; text-align: center;">                
+                <h6 class="MuiTypography-root MuiTypography-h6 MuiTypography-alignCenter"  id="velocidadeInfo" style="padding: 0px; margin-bottom: 2px; margin-top: 2px;">N0461</h6>
+                <p class="lead-wgt">VELOCIDADE</p>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <div class="col m-2 infolightbox colored-low" id="airplaneInfo" style="padding: 10px; text-align: center;">
+                <h6 id="onlineFlights" class="MuiTypography-root MuiTypography-h6 MuiTypography-alignCenter" style="padding: 0px; margin-bottom: 2px; margin-top: 2px;">02:24</h6>
+               
+            </div>
+            <div class="col m-2 infolightbox colored-low" style="padding: 10px; text-align: center;">                
+                <h6 class="MuiTypography-root MuiTypography-h6 MuiTypography-alignCenter" id="DistanciaMilasInfo" style="padding: 0px; margin-bottom: 2px; margin-top: 2px;">02:24</h6>
+                <p class="lead-wgt text-center">DISTANCIA</p>
+            </div>
+            <div class="col m-2 infolightbox colored-low" style="padding: 10px; text-align: center;">
+                
+                <h6 class="MuiTypography-root MuiTypography-h6 MuiTypography-alignCenter" id="ETA" style="padding: 0px; margin-bottom: 2px; margin-top: 2px;">02:24</h6>
+                <p class="lead-wgt text-center">E.T.A</p>
+            </div>
+        </div>
+        <div class="infolightbox" style="margin-top: 1vh; padding: 10px;  margin-left: 5px; margin-right: 5px;">
+            <h6 class="MuiTypography-root MuiTypography-h6" style="padding: 2px 0px 4px;" >Route</h6>
+            <p class="MuiTypography-root typography MuiTypography-body1" id="flightplan"></p>
+        </div>
+        <div class="infolightbox" style="margin-top: 1vh; padding: 10px;  margin-left: 5px; margin-right: 5px;">
+            <h6  id="Username" class="MuiTypography-root MuiTypography-h6 MuiTypography-alignLeft" style="padding: 0px; cursor: pointer;">VINICIUS CARVALHO</h6>
+            <p id="virtualOrganization" class="MuiTypography-root lead MuiTypography-body1" style="padding: 0px;"></p>
+            <p id="xp" class="MuiTypography-root lead MuiTypography-body1" style="padding: 0px;"></p>
+            <p id="flightTime" class="MuiTypography-root lead MuiTypography-body1" style="padding: 0px;"></p>
+            <p id="grade" class="MuiTypography-root lead MuiTypography-body1" style="padding: 0px;"></p>
+        </div>
+        
+    </div>
+    
+
+    <!--SEGUNDO SIDEBAR PARA INFORMACOES DO ATC -->
+    <div id="atc-sidebar" class="sidebar">
+        <div class="infolightbox" style="margin-top: 1vh; padding: 10px;  margin-left: 5px; margin-right: 5px; background-color: rgb(6, 22, 235);">
+            <h6 class="MuiTypography-root MuiTypography-h6" style="padding: 2px 0px 4px;" id="NameAirpot" ></h6>
+            <p id="type"></p>
+            
+        </div>
+        <div class="infolightbox" style="margin-top: 1vh; padding: 10px;  margin-left: 5px; margin-right: 5px; background-color: rgb(6, 22, 235);">
+            <h6 class="MuiTypography-root MuiTypography-h6" style="padding: 2px 0px 4px;" >ATIS</h6>
+
+            <p id="atis"></p>
+            
+        </div>
+        <div class="infolightbox" style="margin-top: 1vh; padding: 10px; margin-left: 5px; margin-right: 5px; background-color: rgb(6, 22, 235);">
+            <h6 class="MuiTypography-root MuiTypography-h6" style="padding: 2px 0px 4px;">INBOUND FLIGHTS (<span id="inboundFlightsCount"></span>)</h6>
+            <div id="inboundFlights" class="flight-list"></div>
+        </div>
+        <div class="infolightbox" style="margin-top: 1vh; padding: 10px; margin-left: 5px; margin-right: 5px; background-color: rgb(6, 22, 235);">
+            <h6 class="MuiTypography-root MuiTypography-h6" style="padding: 2px 0px 4px;">OUTBOUND FLIGHTS (<span id="outboundFlightsCount"></span>)</h6>
+            <div id="outboundFlights" class="flight-list"></div>
+        </div>
+        <div class="infolightbox" style="margin-top: 1vh; padding: 10px; margin-left: 5px; margin-right: 5px; background-color: rgb(6, 22, 235);">
+            <h6 id="atcUsername" class="MuiTypography-root MuiTypography-h6" style="padding: 2px 0px 4px;"></h6>
+            
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

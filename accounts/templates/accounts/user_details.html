@@ -1,0 +1,245 @@
+{% extends 'base_main/baseDashboard.html' %}
+{% load static %}
+{% load gravatar_tags %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-header {
+        background: url('/path/to/your/background/image.jpg') no-repeat center center;
+        background-size: cover;
+        padding: 20px;
+        text-align: center;
+        color: white;
+    }
+
+    .profile-avatar img {
+        border-radius: 50%;
+        border: 5px solid white;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        margin-top: 20px;
+    }
+
+    .profile-info h1 {
+        margin: 10px 0;
+    }
+
+    .profile-stats {
+        background: white;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 1000px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .stats-section {
+        flex: 1;
+        margin: 10px;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .stats-section h3 {
+        margin-bottom: 10px;
+    }
+
+    .awards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .award-item {
+        position: relative;
+        width: 100px;
+        text-align: center;
+    }
+
+    .award-item img {
+        width: 100%;
+        height: 50%;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    /* Efeito de zoom ao passar o mouse */
+    .award-item:hover img {
+        transform: scale(1.1); /* Aumenta a imagem levemente */
+    }
+
+    .progress-container {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        height: 15px;
+        margin-bottom: 5px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: #4caf50;
+        width: {{ listAwards.progress }}%;
+        transition: width 0.4s ease;
+    }
+
+    .progress-text {
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    /* Estilo do nome da conquista */
+    .award-name {
+        position: absolute;
+        bottom: 20px; /* Posiciona o texto acima da barra de progresso */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente */
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+        opacity: 0;
+        pointer-events: none; /* Evita que o texto interfira na interação do mouse */
+        transition: opacity 0.3s ease;
+        font-size: 12px;
+    }
+
+    /* Exibe o nome ao passar o mouse */
+    .award-item:hover .award-name {
+        opacity: 1;
+    }
+</style>
+<div class="profile-header">
+    <div class="profile-avatar">
+        <img src="{{ user_details.email|gravatar_url:150 }}" alt="{{ user.first_name }}" class="rounded-image">
+    </div>
+    <div class="profile-info">
+        <h1>{{ user_details.first_name }} {{ user_details.last_name }}</h1>
+
+    </div>
+</div>
+<div class="profile-stats">
+    <h2 class="text-center">Estatísticas do piloto</h2>
+    <div class="stats-container">
+        <div class="stats-section">
+            <h3>Estatísticas de 30 dias</h3>
+            <p>ID: IFAB{{ user_details.phone|slice:"-4:" }}</p>
+            <p>Base: {{ user_details.base |upper }}</p>
+            <p>Total de horas: {{total_hours}}</p>
+            <p>Total de voos: {{total_flights}}</p>
+            <p>Total de voos 30 dias: {{ last_30_days_flights }}</p>
+            <p>Total de horas 30 dias: {{last_30_days_hours}} </p>
+
+        </div>
+        <div class="stats-section">
+            <h3>Estatísticas Infinite Flight</h3>
+            <p>Voos online: {{ get_user_if.onlineFlights }}</p>
+            <p>Grade: {{ get_user_if.grade }}</p>
+            <p>XP: {{ get_user_if.xp }}</p>
+            <p>Pousos: {{ get_user_if.landingCount }}</p>
+            <p>Horas de voo: {{ get_user_if.flightTime }}</p>
+            <p>ATC Operações: {{ get_user_if.atcOperations }}</p>
+            <p>Violações: {{ get_user_if.violations }}</p>
+        </div>
+    </div>
+</div>
+<div class="profile-stats">
+    <h2 class="text-center">World Tour</h2>
+    <div class="awards-container">
+        {% for listAwards in user_awards %}
+            {% if listAwards.progress > 1 %}
+                <div class="award-item">
+                    <!-- Link para a página de detalhes da conquista -->
+                    <a href="{% url 'award_detail' listAwards.id %}">
+                        <img src="{{ listAwards.award.link_image }}" alt="Award Image">
+                    </a>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: {{ listAwards.progress }}%;"></div>
+                    </div>
+                    <div class="progress-text">{{ listAwards.progress }}%</div>
+                    <div class="award-name">{{ listAwards.award.name }}</div>
+                </div>
+            {% else %}
+                <p>No awards yet.</p>
+            {% endif%}
+        {% endfor %}
+    </div>
+</div>
+<div class="profile-stats">
+    <h2 class="text-center">Prêmios</h2>
+    <div class="awards-container">
+        {% for award in pilot_awards %}
+            <div class="award-item">
+                <img src="{{ award.image_url }}" alt="{{ award.name }}" width="100"> <!-- Exibe a imagem do award -->
+                <div class="award-name">{{ award.name }}</div> <!-- Nome do prêmio -->
+              
+            </div>
+        {% empty %}
+            <p>No awards yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+
+<div class="container">
+    <table class="table table-striped display" id="myTablet">
+        <thead class="leaddisplay-6">
+            <tr>
+                <th class="centered text-center">Voo</th>
+                <th class="centered text-center">Partida</th>
+                <th class="centered text-center">Chegada</th>
+                <th class="centered text-center">Aeronave</th>
+                <th class="centered text-center">Tempo</th>
+                <th class="centered text-center">Data</th>
+                <th class="centered text-center">Status</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for flight in approved_flights %}
+            <tr>
+                <td class="text-center">{{ flight.flight_icao }}{{ flight.flight_number }}</td> <!-- Exibe o número do voo -->
+                <td class="text-center">{{ flight.departure_airport }}</td> <!-- Exibe o aeroporto de partida -->
+                <td class="text-center">{{ flight.arrival_airport }}</td> <!-- Exibe o aeroporto de chegada -->
+                <td class="text-center">{{ flight.aircraft }}</td> <!-- Exibe o tipo de aeronave -->
+                <td class="text-center">{{ flight.flight_duration }}</td> <!-- Exibe o tempo de voo -->
+                <td class="text-center">{{ flight.registration_date|date:"d/m/y" }}</td> <!-- Exibe a data de registro -->
+                <td class="text-center" ><span class="badge rounded-pill text-bg-success">{{ flight.status }}</span></td> <!-- Exibe o status do voo -->
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+    $('#myTablet').DataTable({
+        order: [[6, 'desc']] // Defina a ordem da coluna 5 (índice 5) em ordem decrescente
+    });
+});
+    
+
+</script>
+{% endblock %}
